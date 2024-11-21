@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeerJS Example</title>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <style>
+        video {
+            width: 300px;
+            height: 200px;
+            border: 1px solid black;
+            margin: 10px;
+        }
+
+        #video-container {
+            width: 99%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>PeerJS Example</h1>
+
+    <h2>Local Stream</h2>
+    <video id="localVideo" autoplay muted></video>
+    <div id="video-container"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const peer = new Peer();
+
+        let peerIds = new Set(); // Store peer IDs in a Set to avoid duplicates
+
+        peer.on('open', function (id) {
+            console.log('My peer ID is: ' + id);
+            socket.emit("id-got", id); // Send the peer ID to the server
+        });
+
+        // Listen for incoming peer IDs from the server
+        socket.on("id", (anotherPeerId) => {
+            // Add the new peer ID to the set
+            if (!peerIds.has(anotherPeerId)) {
+                peerIds.add(anotherPeerId);
+                // Only connect to the new peer
+                connectToPeer(anotherPeerId);
+            }
+        });
+
+        // Function to connect to another peer
+        function connectToPeer(anotherPeerId) {
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(function (stream) {
+                    // Display local stream in the local video element
+                    document.getElementById('localVideo').srcObject = stream;
+
+                    // Call the other peer
+                    const call = peer.call(anotherPeerId, stream);
+                    const videoContainer = document.getElementById('video-container');
+
+                    // Create a video element for the remote stream
+                    const videoElement = document.createElement('video');
+                    videoElement.setAttribute("id", "remoteVideo_" + anotherPeerId); // Unique ID for each remote video
+                    videoElement.autoplay = true;
+                    videoElement.style.width = '40%'; // Adjust width as needed
+                    videoElement.style.border = '1px solid black';
+                    videoElement.style.margin = '5px';
+                    videoContainer.appendChild(videoElement);
+
+                    call.on('stream', function (remoteStream) {
+                        // Display remote stream in the corresponding remote video element
+                        document.getElementById('remoteVideo_' + anotherPeerId).srcObject = remoteStream;
+                    });
+                })
+                .catch(function (err) {
+                    console.error('Failed to get local stream', err);
+                });
+        }
+
+        // Handle incoming calls and answer them
+        peer.on('call', function (call) {
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(function (stream) {
+                    call.answer(stream);    // Answer the call with an A/V stream.
+                    document.getElementById('localVideo').srcObject = stream;
+
+                    // Create a video element for the remote stream
+                    const videoContainer = document.getElementById('video-container');
+
+                    const videoElement = document.createElement('video');
+                    const remotePeerId = call.peer; // Get the ID of the calling peer
+                    videoElement.setAttribute("id", "remoteVideo_" + remotePeerId); // Unique ID for each remote video
+                    videoElement.autoplay = true;
+                    videoElement.style.width = '30%'; videoElement.style.border = '1px solid black';
+                    videoElement.style.margin = '5px';
+                    videoContainer.appendChild(videoElement);
+
+                    call.on('stream', function (remoteStream) {
+                        document.getElementById('remoteVideo_' + remotePeerId).srcObject = remoteStream;
+                    });
+                })
+                .catch(function (err) {
+                    console.error('Failed to get local stream', err);
+                });
+        });
+
+        // Disconnection handling
+        socket.on("user-disconnected", (name) => {
+            if (peerIds.has(name)) {
+                console.log(name);
+                let myDiv = document.getElementById('video-container');
+                const videoElement = document.getElementById('remoteVideo_' + name);
+
+                // Check if the video element exists before trying to remove it
+                if (videoElement) {
+                    videoElement.remove();
+                    console.log("Removed video for:", name);
+                } else {
+                    console.log("No video element found for:", name);
+                }
+
+                // Remove the peer ID from the set
+                peerIds.delete(name);
+            } else {
+                console.log("Peer ID not found:", name);
+            }
+        });
+    </script>
+</body>
+
+</html>
