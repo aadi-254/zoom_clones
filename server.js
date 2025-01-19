@@ -15,6 +15,11 @@ io.on("connection", (socket) => {
     let message = "connect";
     socket.emit("message", message);
 
+
+    socket.on('chat message', (data) => {
+        console.log('Message from ' + data.user + ': ' + data.msg);
+        io.emit('chat message', data);
+    });
     // Store the peer ID when received
     socket.on("id-got", (peerid) => {
         console.log('Peer ID received:', peerid);
