@@ -1,1 +1,138 @@
+* {
+    margin: 0%;
+    padding: 0%;
+    box-sizing: border-box;
+}
 
+video {
+    border: 1px solid black;
+    margin: 10px;
+    max-height: 200px;
+    max-width: 200px;
+}
+
+#video-container {
+    width: 60vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.userVideo {
+    height: 200px;
+    width: 200px;
+    margin: 5px;
+}
+
+/************** chat section *******/
+
+.chat {
+    display: none;
+}
+
+.chat_section {
+    position: fixed;
+    top: 0%;
+    height: 100vh;
+    right: 0%;
+    width: 40vw;
+    background: rgb(1, 19, 25);
+}
+
+#messages {
+    list-style-type: none;
+    padding: 0;
+}
+
+.chat_section .inp {
+    height: 40px;
+    display: flex;
+    width: 100%;
+    gap: 4px;
+    justify-content: center;
+    position: absolute;
+    top: 90%;
+}
+
+.message {
+    padding: 8px;
+    margin: 5px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+}
+.message li{
+    margin: 5px;
+}
+.my-message {
+    background-color: lightblue;
+    text-align: right;
+}
+
+.other-message {
+    background-color: lightgray;
+    text-align: left;
+}
+
+#sendButton {
+    background-color: rgb(2, 47, 9);
+    color: white;
+    width: 20%;
+
+
+}
+
+
+/**** video stream controller ****/
+
+footer {
+    background: black;
+    color: aliceblue;
+    position: fixed;
+    display: flex;
+    width: 400px;
+    height: 40px;
+    justify-content: space-evenly;
+    align-items: center;
+    left: 10vw;
+    top: 92vh;
+    z-index: -1;
+}
+
+footer button {
+    padding: 10px;
+    transition: 400ms;
+}
+
+#start-video-btn {
+    display: none;
+}
+
+#start-audio-btn {
+    display: none;
+}
+
+footer button:hover {
+    color: black;
+    background: white;
+}
+
+
+/* Media query for devices with a max width of 768px */
+@media only screen and (max-width: 768px) {
+    .chat {
+        display: block;
+    }
+
+    .chat_section {
+        position: absolute;
+        top: 10vh;
+        width: 99vw;
+        transform: translateX(-100vw);
+        height: 80vh;
+        background: rgb(1, 19, 25);
+    }
+}
