@@ -20,8 +20,8 @@ video {
 }
 
 .userVideo {
-    min-height:200px;
-    min-weight:200px;
+    min-height:500px;
+    min-weight:500px;
     height: 40%;
     width: 40%;
     margin: 5px;
